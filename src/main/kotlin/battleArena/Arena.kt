@@ -1,60 +1,83 @@
 package battleArena
 
-class Arena(warrior1: Warrior, warrior2: Warrior, dice: Dice) {
-    private val warrior1: Warrior
-    private val warrior2: Warrior
+class Arena(enemyWarrior: EnemyWarrior, warrior: Warrior, dice: Dice) {
+    private val enemyWarrior: EnemyWarrior
+    private val warrior: Warrior
     private val dice: Dice
 
     init {
-        this.warrior1 = warrior1
-        this.warrior2 = warrior2
+        this.enemyWarrior = enemyWarrior
+        this.warrior = warrior
         this.dice = dice
+    }
+
+    fun fight() {
+        println("Welcome to Arena")
+        println("Today will fight warriors \u001b[31m $enemyWarrior \u001b[0m and \u001b[31m $warrior \u001b[0m")
+        println("Let the fight begin...")
+
+        while (enemyWarrior.isAlive() && warrior.isAlive()) {
+            println("It\'s your turn, what is your move?")
+            printOptions()
+            var playersAction: String = (readLine()?.ifBlank { null } ?: "Conan").toString()
+            playersResponse(playersAction)
+            enemyResponse()
+
+            println("Your enemy is ${enemyWarrior.getState()}, what is your move?")
+            printOptions()
+            playersAction = (readLine()?.ifBlank { null } ?: "Conan").toString()
+            playersResponse(playersAction)
+        }
     }
 
     fun printArena() {
         println("-------------- Arena --------------\n")
         println("Warrior\'s health: \n")
-        if (warrior1 is Warrior) {
-            println("$warrior1 \u001B[32m ${warrior1.graphicHp()} \u001b[0m")
-        } else if(warrior1 is Mage) {
-            println("$warrior1 \u001B[32m ${warrior1.graphicHp()} \u001b[0m")
-            println("$warrior1 \u001b[34m ${warrior1.graphicMana()} \u001b[0m")
-        }
+        println("$enemyWarrior \u001B[32m ${enemyWarrior.graphicHp()} \u001b[0m")
 
-        if (warrior2 is Mage) {
-            println("$warrior2 \u001B[32m ${warrior2.graphicHp()} \u001B[0m | \u001B[34m ${warrior2.graphicMana()} \u001B[0m")
-        } else if (warrior2 is Warrior) {
-            println("$warrior2 \u001B[32m ${warrior2.graphicHp()} \u001B[0m")
+        if (warrior is Mage) {
+            println("$warrior \u001B[32m ${warrior.graphicHp()} \u001B[0m | \u001B[34m ${warrior.graphicMana()} \u001B[0m")
+        } else if (warrior is Warrior) {
+            println("$warrior \u001B[32m ${warrior.graphicHp()} \u001B[0m")
         }
     }
+
     fun printMessage(message: String) {
         println(message)
-        Thread.sleep(2000)
+        Thread.sleep(200)
     }
 
-    fun fight() {
-        println("Welcome to Arena")
-        println("Today will fight warriors \u001b[31m $warrior1 \u001b[0m and \u001b[31m $warrior2 \u001b[0m")
-        println("Let the fight begin...")
-
-        while (warrior1.isAlive() && warrior2.isAlive()) {
-            warrior1.attack(warrior2)
-            printArena()
-            printMessage(warrior1.getMessage())
-            printMessage(warrior2.getMessage())
-
-            if (!warrior1.isAlive()) {
-                println(warrior1.getMessage())
-                break
-            } else if (!warrior2.isAlive()) {
-                println(warrior2.getMessage())
-                break
-            }
-
-            warrior2.attack(warrior1)
-            printArena()
-            printMessage(warrior2.getMessage())
-            printMessage(warrior1.getMessage())
+    fun printInfoAboutBattle() {
+        printArena()
+        if (warrior.wasInTurn()) {
+            printMessage(warrior.getMessage())
+            printMessage(enemyWarrior.getMessage())
+        } else {
+            printMessage(enemyWarrior.getMessage())
+            printMessage(warrior.getMessage())
         }
+    }
+
+    fun printOptions() {
+        println("A: Attack")
+        println("B: Defend")
+    }
+
+    fun playersResponse(playerAction: String) {
+        if (playerAction == "A") {
+            warrior.attack(enemyWarrior)
+            printInfoAboutBattle()
+        } else if (playerAction !== "B") {
+            warrior.defend()
+            printInfoAboutBattle()
+        } else {
+            warrior.defend()
+            printInfoAboutBattle()
+        }
+    }
+
+    fun enemyResponse() {
+        enemyWarrior.act(warrior)
+        printInfoAboutBattle()
     }
 }

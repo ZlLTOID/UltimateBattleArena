@@ -33,10 +33,11 @@ class Mage(name: String, hp: Int, attack: Int, defend: Int, dice: Dice, mana: In
     }
 
     override fun attack(enemy: Warrior) {
-        var magicAttack = super.attack + (dice.roll() * 3)
+        var magicAttack = attack + (dice.roll() * 3)
 
         if (currentMana == mana) {
-            enemy.defend(magicAttack)
+//            enemy.defend(magicAttack)
+            enemy.setIncomingAttack(magicAttack)
             battleMessage = "$name attacks $enemy with magic and dealt $magicAttack damage!"
             currentMana = 0
         } else {
@@ -49,7 +50,7 @@ class Mage(name: String, hp: Int, attack: Int, defend: Int, dice: Dice, mana: In
         }
     }
 
-    override fun defend(incomingAttack: Int) {
+    override fun defend() {
         val damage = incomingAttack - defend + (dice.roll() - 6)
 
         if (damage > 0) {
